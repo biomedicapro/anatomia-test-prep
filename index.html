@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#08131f">
+<title>Neuroanatomía Clínica · Miembro Superior</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08131f;
+  --bg-2:#0b1928;
+  --text:#f3f7fb;
+  --muted:#95a8bb;
+  --line:rgba(255,255,255,.10);
+  --line-strong:rgba(255,255,255,.17);
+  --accent:#48c7be;
+  --accent-2:#8b80ff;
+  --accent-soft:rgba(72,199,190,.12);
+  --good:#5de1a5;
+  --good-soft:rgba(93,225,165,.12);
+  --bad:#ff7b6e;
+  --bad-soft:rgba(255,123,110,.12);
+  --header-h:112px;
+  --action-h:88px;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+body{
+  color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:
+    radial-gradient(circle at 10% -6%, rgba(139,128,255,.14), transparent 34%),
+    radial-gradient(circle at 100% 4%, rgba(72,199,190,.12), transparent 30%),
+    linear-gradient(180deg,#0a1725 0%,#07111b 100%);
+}
+button{font:inherit}
+
+.app{
+  width:100%;
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Header: status only, not a card */
+.topbar{
+  flex:none;
+  padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(8,19,31,.97),rgba(8,19,31,.90));
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  z-index:5;
+}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{min-width:0}
+.kicker{
+  color:var(--accent);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-bottom:4px;
+}
+.title{
+  font-size:14px;
+  font-weight:650;
+  letter-spacing:-.01em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.score{
+  flex:none;
+  display:flex;
+  align-items:baseline;
+  gap:5px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+.score b{font-size:18px;color:var(--good);font-variant-numeric:tabular-nums}
+.statusrow{display:flex;align-items:center;gap:12px;margin-top:13px}
+.counter{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.counter b{color:var(--text);font-weight:700}
+.progress{height:4px;flex:1;background:rgba(255,255,255,.07);overflow:hidden;border-radius:999px}
+.progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:inherit;transition:width .35s ease}
+.stage-indicator{display:flex;gap:5px;flex:none}
+.stage-indicator span{width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,.13);transition:.25s ease}
+.stage-indicator span.active{width:17px;background:var(--accent)}
+.stage-indicator span.done{background:var(--accent-2)}
+
+/* Main full-screen content */
+.main{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:none;
+  scroll-behavior:smooth;
+}
+.main::-webkit-scrollbar{display:none}
+.content{
+  width:100%;
+  max-width:760px;
+  margin:0 auto;
+  padding:24px 20px 38px;
+}
+.stage-label{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  margin:0 0 11px;
+}
+.stem{
+  font-family:'Source Serif 4',Georgia,serif;
+  font-size:clamp(20px,5.1vw,28px);
+  line-height:1.45;
+  letter-spacing:-.018em;
+  font-weight:500;
+  margin:0;
+  text-wrap:pretty;
+}
+
+.image-area{
+  margin-top:28px;
+  border-top:1px solid var(--line);
+  padding-top:20px;
+}
+.image-area[hidden]{display:none}
+.image-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.image-meta span:first-child{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.image-meta span:last-child{font-size:11px;color:var(--muted)}
+.image-stage{
+  width:100%;
+  min-height:190px;
+  max-height:44dvh;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:rgba(255,255,255,.025);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.image-stage img{display:block;max-width:100%;max-height:44dvh;width:auto;height:auto;object-fit:contain}
+.image-fallback{padding:42px 18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5}
+.image-fallback svg{display:block;width:30px;height:30px;margin:0 auto 10px;opacity:.55}
+
+.answers{
+  margin-top:28px;
+  border-top:1px solid var(--line);
+  padding-top:19px;
+}
+.answers[hidden]{display:none}
+.answers-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px}
+.answers-head h2{font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:800}
+.answers-head span{font-size:11px;color:var(--muted)}
+.options{display:flex;flex-direction:column}
+.opt{
+  width:100%;
+  appearance:none;
+  border:0;
+  border-bottom:1px solid var(--line);
+  background:transparent;
+  color:var(--text);
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) 22px;
+  gap:11px;
+  align-items:center;
+  padding:15px 2px;
+  text-align:left;
+  cursor:pointer;
+  min-height:58px;
+  transition:background .18s ease,border-color .18s ease,opacity .18s ease;
+}
+.opt:first-child{border-top:1px solid var(--line)}
+.opt:active{background:rgba(255,255,255,.035)}
+.opt .letter{
+  width:30px;height:30px;border-radius:50%;
+  display:grid;place-items:center;
+  border:1px solid var(--line-strong);
+  color:var(--muted);
+  font-size:12px;font-weight:800;
+  transition:.18s ease;
+}
+.opt .text{font-size:15px;line-height:1.42;font-weight:520}
+.opt .state{font-size:17px;text-align:center;color:transparent}
+.opt.correct{background:linear-gradient(90deg,var(--good-soft),transparent 70%)}
+.opt.correct .letter{background:var(--good);border-color:var(--good);color:#042115}
+.opt.correct .state{color:var(--good)}
+.opt.incorrect{background:linear-gradient(90deg,var(--bad-soft),transparent 70%)}
+.opt.incorrect .letter{background:var(--bad);border-color:var(--bad);color:#2a0a06}
+.opt.incorrect .state{color:var(--bad)}
+.opt.dim{opacity:.42}
+
+.feedback{
+  display:none;
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.feedback.show{display:block;animation:fadeUp .25s ease}
+.feedback-title{font-size:12px;font-weight:850;letter-spacing:.10em;text-transform:uppercase;margin-bottom:8px}
+.feedback.ok .feedback-title{color:var(--good)}
+.feedback.bad .feedback-title{color:var(--bad)}
+.feedback p{margin:0;color:#becbd7;font-size:14px;line-height:1.65}
+
+/* Bottom action, always reachable by thumb */
+.actionbar{
+  flex:none;
+  padding:10px 18px calc(10px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(8,19,31,.88),rgba(8,19,31,.98));
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  z-index:6;
+}
+.action-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:11px}
+.stage-copy{flex:1;min-width:0}
+.stage-copy small{display:block;color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.10em;text-transform:uppercase;margin-bottom:3px}
+.stage-copy strong{display:block;font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cbd6e0}
+.primary{
+  flex:none;
+  min-width:148px;
+  min-height:50px;
+  border:0;
+  border-radius:14px;
+  padding:0 18px;
+  cursor:pointer;
+  font-weight:800;
+  font-size:13.5px;
+  color:#031815;
+  background:linear-gradient(135deg,#57d7cd,#31a99f);
+  box-shadow:0 12px 28px rgba(42,161,152,.20);
+  transition:transform .12s ease,filter .18s ease,opacity .18s ease;
+}
+.primary:active{transform:scale(.975)}
+.primary[hidden]{display:none}
+.primary:disabled{opacity:.5;cursor:not-allowed}
+
+/* Summary uses the same fullscreen structure */
+.summary{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:10px 0 34px}
+.summary .overline{font-size:10px;font-weight:850;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.summary h1{font-family:'Source Serif 4',Georgia,serif;font-size:clamp(34px,9vw,54px);line-height:1.04;letter-spacing:-.035em;margin:0 0 12px;font-weight:600}
+.summary .lead{font-size:15px;color:var(--muted);line-height:1.6;margin:0 0 28px;max-width:560px}
+.big-score{display:flex;align-items:flex-end;gap:12px;margin-bottom:28px}
+.big-score b{font-family:'Source Serif 4',Georgia,serif;font-size:72px;line-height:.88;font-weight:600;letter-spacing:-.05em}
+.big-score span{font-size:18px;color:var(--muted);padding-bottom:7px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:26px}
+.stat{padding:15px 4px}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat b{display:block;font-size:20px;margin-bottom:4px}
+.stat span{display:block;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.restart{width:100%;min-height:52px;border:1px solid var(--line-strong);background:transparent;color:var(--text);font-weight:800;border-radius:14px;cursor:pointer}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+button:focus-visible{outline:3px solid rgba(72,199,190,.35);outline-offset:2px}
+
+@media (min-width:700px){
+  .topbar{padding-left:30px;padding-right:30px}
+  .content{padding:34px 30px 54px}
+  .actionbar{padding-left:30px;padding-right:30px}
+}
+
+@media (max-width:380px){
+  .topbar{padding-left:14px;padding-right:14px}
+  .content{padding-left:16px;padding-right:16px}
+  .actionbar{padding-left:14px;padding-right:14px}
+  .stage-copy{display:none}
+  .primary{width:100%;min-width:0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar" id="topbar">
+    <div class="topline">
+      <div class="brand">
+        <div class="kicker">Neuroanatomía clínica</div>
+        <div class="title">Miembro superior</div>
+      </div>
+      <div class="score"><span>Aciertos</span><b id="scoreNow">0</b></div>
+    </div>
+    <div class="statusrow">
+      <div class="counter">Pregunta <b id="qNow">1</b> de <span id="qTotal">41</span></div>
+      <div class="progress" aria-label="Progreso del cuestionario"><span id="progressFill"></span></div>
+      <div class="stage-indicator" aria-label="Etapa actual">
+        <span id="dot0"></span><span id="dot1"></span><span id="dot2"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main" id="mainScroll">
+    <div class="content" id="content">
+      <div class="stage-label" id="stageLabel">Lee el caso clínico</div>
+      <p class="stem" id="stemText"></p>
+
+      <section class="image-area" id="imageArea" hidden aria-live="polite">
+        <div class="image-meta">
+          <span>Apoyo visual</span>
+          <span>Amplía mentalmente la anatomía</span>
+        </div>
+        <div class="image-stage">
+          <img id="qImage" alt="Ilustración correspondiente a la pregunta">
+          <div class="image-fallback" id="imgFallback" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 16l5-5 4 4 5-6 4 5"/><circle cx="8.5" cy="8" r="1.4"/></svg>
+            <div>La imagen no está disponible.<br>Puedes continuar con las opciones.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="answers" id="answers" hidden>
+        <div class="answers-head">
+          <h2>Selecciona una respuesta</h2>
+          <span>Una sola opción</span>
+        </div>
+        <div class="options" id="optionsWrap" role="group" aria-label="Opciones de respuesta"></div>
+        <div class="feedback" id="feedback" aria-live="polite">
+          <div class="feedback-title" id="feedbackLabel"></div>
+          <p id="feedbackText"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="actionbar" id="actionbar">
+    <div class="action-inner">
+      <div class="stage-copy">
+        <small id="actionEyebrow">Paso 1 de 3</small>
+        <strong id="actionHint">Comprende la viñeta antes de avanzar</strong>
+      </div>
+      <button class="primary" id="advanceBtn" type="button">Ver imagen</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+const questions = [
+{ stem:`Un hombre de 18 años ingresa en el servicio de urgencias después de sufrir una lesión mientras jugaba al rugby. El estudio radiológico muestra una fractura transversa del húmero, aproximadamente 3 cm proximal al epicóndilo. ¿Qué nervio se lesiona con mayor frecuencia por los bordes cortantes del hueso fracturado en esta localización?`,
+  options:["Axilar","Mediano","Musculocutáneo","Radial","Cubital"], correct:3,
+  explain:`El nervio radial atraviesa el tabique intermuscular lateral y discurre muy pegado al húmero unos 3 cm proximales al epicóndilo lateral, por lo que es especialmente vulnerable en fracturas de esta localización.` },
+
+{ stem:`Un director de banda de 52 años presentó problemas en el brazo derecho varios días después de un ejercicio agotador durante un torneo de atletismo. La exploración en traumatología muestra caída de la muñeca y debilidad de agarre, con extensión normal del codo. No hay pérdida de sensibilidad en la extremidad afectada. ¿Qué nervio se afectó?`,
+  options:["Cubital","Interóseo anterior","Interóseo posterior","Mediano","Radial superficial"], correct:2,
+  explain:`El nervio interóseo posterior (rama profunda motora del radial) inerva los extensores del carpo y los dedos. Su lesión produce caída de la muñeca sin pérdida sensitiva (la rama superficial del radial queda indemne) y respeta la extensión del codo (el tríceps ya está inervado proximalmente).` },
+
+{ stem:`Una mujer de 32 años ingresa en urgencias tras un accidente de tráfico. El estudio radiológico muestra múltiples fracturas del húmero. La flexión y la supinación del antebrazo están gravemente debilitadas, y hay pérdida de sensibilidad en la superficie lateral del antebrazo. ¿Cuál de los siguientes nervios se ha lesionado?`,
+  options:["Radial","Musculocutáneo","Mediano","Fascículo lateral del plexo braquial","Nervio cutáneo lateral del antebrazo"], correct:1,
+  explain:`El nervio musculocutáneo inerva el bíceps braquial y el braquial (flexión y supinación del antebrazo) y termina como nervio cutáneo lateral del antebrazo, dando sensibilidad a esa zona.` },
+
+{ stem:`En la consulta ambulatoria de una mujer de 24 años se solicita una analítica de sangre. ¿Cuál de las siguientes arterias corre riesgo durante la venopunción de la fosa cubital?`,
+  options:["Braquial","Interósea común","Cubital","Interósea anterior","Radial"], correct:0,
+  explain:`La arteria braquial (o una variante superficial de ella) discurre muy cerca de las venas de la fosa cubital habitualmente usadas para venopunción, por lo que puede lesionarse accidentalmente.` },
+
+{ stem:`Un hombre de 22 años es diagnosticado de un melanoma maligno metastásico en la piel sobre la apófisis xifoides. ¿Qué nódulos reciben la mayor parte de la linfa de esta zona y, en consecuencia, se afectan en las metástasis del tumor?`,
+  options:["Inguinales profundos","Grupo vertical de los nódulos inguinales superficiales","Grupo horizontal de los nódulos inguinales superficiales","Axilares","Inguinales profundos y superficiales"], correct:3,
+  explain:`La piel del tronco por encima del ombligo, incluida la región xifoidea, drena principalmente hacia los nódulos linfáticos axilares.` },
+
+{ stem:`Una mujer de 49 años que sufrió un infarto de miocardio debe someterse a un injerto de derivación empleando la arteria torácica interna. ¿Qué arterias continuarán aportando sangre a la parte anterior de los espacios intercostales superiores?`,
+  options:["Musculofrénica","Epigástrica superior","Intercostales posteriores","Torácica lateral","Toracodorsal"], correct:2,
+  explain:`Tras extraer la arteria torácica interna, las arterias intercostales posteriores (ramas de la aorta) mantienen, gracias a sus anastomosis, el aporte sanguíneo a la parte anterior de los espacios intercostales superiores.` },
+
+{ stem:`Una mujer de 22 años ingresa inconsciente en urgencias. La enfermera le toma el pulso radial para determinar su frecuencia cardíaca. ¿Lateral a qué tendón se percibe este pulso?`,
+  options:["Palmar largo","Flexor largo del pulgar","Flexor profundo de los dedos","Flexor radial del carpo","Flexor superficial de los dedos"], correct:3,
+  explain:`El pulso radial se palpa lateral al tendón del flexor radial del carpo, en la cara anterior de la muñeca.` },
+
+{ stem:`Un hombre de 45 años ingresa tras caminar accidentalmente sobre cristales rotos de la puerta de un bar, estando ebrio. La exploración muestra múltiples laceraciones de la extremidad superior, con incapacidad para flexionar las articulaciones interfalángicas distales del 4.º y 5.º dedos. ¿Cuál de los siguientes músculos está afectado?`,
+  options:["Flexor profundo de los dedos","Flexor superficial de los dedos","Lumbricales","Flexor profundo de los dedos y flexor superficial de los dedos","Interóseos"], correct:0,
+  explain:`El flexor profundo de los dedos es el único músculo que flexiona las articulaciones interfalángicas distales; su lesión impide flexionar esta articulación en el 4.º y 5.º dedos.` },
+
+{ stem:`Un hombre de 24 años ingresa con una herida en la palma de la mano. No puede tocarse las yemas de los dedos con el pulgar, pero sí puede sujetar un papel entre los dedos, y no ha perdido sensibilidad en la piel de la mano. ¿Cuál de los siguientes nervios se ha lesionado?`,
+  options:["Rama profunda del cubital","Interóseo anterior","Mediano","Rama recurrente del mediano","Rama profunda del radial"], correct:3,
+  explain:`La rama recurrente (motora) del mediano inerva los músculos tenares responsables de la oposición del pulgar. Al ser puramente motora, su lesión no produce pérdida de sensibilidad, y la aducción (sujetar un papel) depende del cubital, que permanece intacto.` },
+
+{ stem:`Un hombre de 55 años es explorado tras sufrir un traumatismo cerrado en la axila derecha durante una caída. Tiene dificultad para elevar el brazo derecho por encima de la altura del hombro. El ángulo inferior de la escápula derecha sobresale más que el de la izquierda, y esto se acentúa cuando el paciente empuja contra una resistencia. ¿Cuál de las siguientes estructuras nerviosas se ha lesionado?`,
+  options:["Fascículo posterior del plexo braquial","Nervio torácico largo","Tronco superior del plexo braquial","Origen de los nervios subescapulares medio e inferior","Raíces C7, C8 y T1 de los nervios espinales"], correct:1,
+  explain:`El nervio torácico largo inerva el serrato anterior. Su lesión produce escápula alada, más evidente al empujar contra resistencia, con dificultad para elevar el brazo por encima del hombro.` },
+
+{ stem:`Una madre tira bruscamente de la mano de su hijo para apartarlo de la calzada, y el niño llora de dolor. Después no puede extender el antebrazo en el codo. En urgencias, el estudio radiológico muestra una luxación de la cabeza del radio. ¿Cuál de los siguientes ligamentos se asocia directamente con esta lesión?`,
+  options:["Anular","Cápsula articular","Interóseo","Colateral radial","Colateral cubital"], correct:0,
+  explain:`El ligamento anular rodea la cabeza del radio y es la estructura implicada en la subluxación clásica conocida como "codo de niñera".` },
+
+{ stem:`Tras un parto con fórceps, el recién nacido presenta la extremidad superior en aducción, rotación interna y flexión de la muñeca. El reflejo de sobresalto (Moro) está ausente en el lado homolateral. ¿Qué parte del plexo braquial se ha lesionado durante el parto?`,
+  options:["Fascículo lateral","Fascículo medial","Raíces del tronco inferior","Raíz del tronco medio","Raíces del tronco superior"], correct:4,
+  explain:`La postura en "propina de camarero" (aducción y rotación interna del brazo, flexión de la muñeca) junto con el reflejo de Moro ausente es característica de la parálisis de Erb-Duchenne, por lesión de las raíces C5-C6 del tronco superior.` },
+
+{ stem:`Un paciente de 35 años tiene un tumor pequeño, pero doloroso, bajo la uña del dedo meñique. ¿Qué nervio habría que anestesiar para eliminar el tumor sin dolor?`,
+  options:["Radial superficial","Digital palmar común del mediano","Digital palmar común del cubital","Radial profundo","Rama recurrente del mediano"], correct:2,
+  explain:`El 5.º dedo recibe su inervación sensitiva palmar, incluyendo el lecho ungueal, a través del nervio digital palmar del cubital.` },
+
+{ stem:`Un atleta de 25 años ingresa en urgencias tras caer mal de un salto con pértiga. El estudio radiológico de la mano muestra una fractura de un hueso del carpo situado en el suelo de la tabaquera anatómica. ¿Qué hueso se ha fracturado?`,
+  options:["Piramidal","Escafoides","Grande","Ganchoso","Trapezoide"], correct:1,
+  explain:`El escafoides forma el suelo de la tabaquera anatómica y es el hueso del carpo que se fractura con mayor frecuencia, típicamente por una caída sobre la mano en extensión.` },
+
+{ stem:`Un hombre de 36 años ingresa por una herida profunda por arma blanca en el lado medial del antebrazo distal. No puede sujetar un papel entre los dedos y presenta pérdida sensitiva en la cara medial de la mano y en el 5.º dedo. ¿Qué nervio se ha lesionado?`,
+  options:["Axilar","Mediano","Musculocutáneo","Radial","Cubital"], correct:4,
+  explain:`El nervio cubital, a nivel del antebrazo distal, inerva los músculos responsables de la aducción/abducción de los dedos (sujetar un papel) y da sensibilidad a la cara medial de la mano y al 5.º dedo.` },
+
+{ stem:`Un joven de 19 años acude a urgencias tras dislocarse el hombro jugando al fútbol. Tras la reducción, presenta dolor en la región dorsal del hombro y no puede abducir el brazo con normalidad. La RM muestra un desgarro muscular. ¿Cuál de los siguientes músculos puede haberse dañado?`,
+  options:["Coracobraquial","Cabeza larga del tríceps","Pectoral menor","Supraespinoso","Redondo mayor"], correct:3,
+  explain:`El supraespinoso inicia los primeros grados de abducción del hombro; su desgarro, frecuente tras luxaciones, dificulta iniciar este movimiento.` },
+
+{ stem:`Una tenista profesional de 47 años es informada de que tiene una lesión del manguito de los rotadores que requerirá cirugía. Su médico explica que, con los años de juego, un ligamento del hombro ha causado gradualmente un daño grave en la musculatura subyacente. ¿A qué ligamento se refiere?`,
+  options:["Ligamento acromioclavicular","Ligamento coracohumeral","Ligamento transverso de la escápula","Ligamento glenohumeral","Ligamento coracoacromial"], correct:4,
+  explain:`El ligamento coracoacromial forma parte del arco coracoacromial, bajo el cual pasa el manguito de los rotadores. Su engrosamiento con el paso de los años favorece el pinzamiento (impingement) crónico del supraespinoso.` },
+
+{ stem:`Un hombre de 69 años nota adormecimiento de los tres dedos medios de la mano derecha y dificultad para sujetar objetos. Se jubiló 9 años atrás tras trabajar 50 años como carpintero. Presenta atrofia de la eminencia tenar. ¿Cuál de las siguientes es la causa de sus problemas?`,
+  options:["Compresión del nervio mediano en el túnel del carpo","Osteófito que comprime el nervio cubital en el epicóndilo medial","Hipertrofia del tríceps que comprime el plexo braquial","Artrosis de la columna cervical","Traumatismo repetido en el nervio cubital"], correct:0,
+  explain:`La compresión crónica del nervio mediano en el túnel del carpo produce parestesias en los tres primeros dedos y medio del cuarto, junto con atrofia tenar, típica de trabajos manuales repetitivos.` },
+
+{ stem:`Un chico de 13 años es llevado a urgencias tras perder el control en una carrera de motos y ser atropellado por varios motoristas. Presenta cortes y hematomas. No puede extender la muñeca, los dedos ni el pulgar izquierdos, aunque sí puede extender el codo. Ha perdido sensibilidad en la mitad lateral del dorso de la mano izquierda. ¿Qué nervio se ha lesionado y en qué parte del brazo se localiza la lesión?`,
+  options:["Nervio mediano, zona anterior de la muñeca","Nervio mediano, brazo","Nervio radial, tercio medio del húmero","Nervio cubital, zona mediolateral del antebrazo","Nervio cubital, región mediopalmar"], correct:2,
+  explain:`La extensión de codo conservada (tríceps indemne) junto con la pérdida de extensión de muñeca, dedos y pulgar, y la anestesia dorsolateral de la mano, localizan la lesión del nervio radial en el tercio medio del húmero (surco espiral), distal al origen de las ramas para el tríceps.` },
+
+{ stem:`Un joven de 17 años nota debilidad en la flexión del codo y la supinación de la mano izquierda tras una herida por arma blanca en ese brazo, durante una pelea callejera. En urgencias se determina que se ha seccionado un nervio. ¿Cuál de los siguientes hallazgos se observará también en la exploración física?`,
+  options:["Incapacidad para aducir y abducir los dedos","Incapacidad para flexionar los dedos","Incapacidad para flexionar el pulgar","Pérdida sensitiva en la superficie lateral del antebrazo","Pérdida sensitiva en la superficie medial del antebrazo"], correct:3,
+  explain:`El nervio musculocutáneo termina como nervio cutáneo lateral del antebrazo; su sección produce, además de la debilidad de flexión/supinación, pérdida de sensibilidad en la superficie lateral del antebrazo.` },
+
+{ stem:`Tras varios días de ensayos de 12 horas con la orquesta sinfónica para una ópera de Wagner, un director de 52 años nota un dolor tan intenso en la cara posterior del antebrazo derecho que no puede seguir dirigiendo. Al palpar el antebrazo 2 cm en dirección posteromedial, distal al epicóndilo lateral, el dolor es intensísimo. Se recomiendan infiltraciones de esteroides y reposo. ¿De cuál de las siguientes lesiones se trata?`,
+  options:["Compresión del nervio cubital por el flexor cubital del carpo","Compresión del nervio mediano por el pronador redondo","Compresión del nervio mediano por el flexor superficial de los dedos","Compresión del nervio radial superficial por el braquiorradial","Compresión del nervio radial profundo por el supinador"], correct:4,
+  explain:`El túnel radial, formado en parte por el arco de Frohse (borde proximal del supinador), puede comprimir el nervio interóseo posterior (radial profundo), causando dolor a la palpación distal al epicóndilo lateral: es el síndrome del túnel radial.` },
+
+{ stem:`Una corredora de maratón de 54 años acude con dolor en la muñeca derecha tras una caída con la mano en extensión. El estudio radiológico muestra una luxación anterior de un hueso del carpo. ¿Cuál de los siguientes huesos se ha luxado?`,
+  options:["Grande","Semilunar","Escafoides","Trapezoide","Piramidal"], correct:1,
+  explain:`La caída sobre la mano en extensión es el mecanismo clásico de la luxación anterior (palmar) del semilunar.` },
+
+{ stem:`Un hombre de 45 años ingresa tras un accidente de tráfico. El estudio radiológico muestra hernias discales leves de C7, C8 y T1, con déficit sensitivo en los dermatomas de los nervios espinales C8 y T1. Los ganglios de la raíz dorsal de C8 y T1 contendrían los cuerpos celulares de las fibras sensitivas transportadas, ¿por cuál de los siguientes nervios?`,
+  options:["Nervio cutáneo antebraquial medial","Nervio torácico largo","Nervio cutáneo antebraquial lateral","Rama profunda del nervio cubital","Nervio interóseo anterior"], correct:0,
+  explain:`El nervio cutáneo antebraquial medial se origina del fascículo medial del plexo braquial con fibras de C8-T1, cuyos cuerpos celulares sensitivos residen en los ganglios de la raíz dorsal correspondientes.` },
+
+{ stem:`Una chica de 23 años, del servicio de limpieza de un hotel, hacía una cama. Al alisar la sábana con los dedos extendidos, se enganchó el dedo índice y sintió un dolor intenso y brusco en la base de la falange distal. Horas después, el dedo estaba inflamado y no podía extender completamente la articulación interfalángica distal. ¿Qué estructura del dedo se ha lesionado?`,
+  options:["Rama digital palmar propia del nervio mediano","Vínculo largo","Inserción del tendón extensor de los dedos en la base de la falange distal","Inserción del tendón flexor profundo de los dedos","Inserción del tendón flexor superficial de los dedos"], correct:2,
+  explain:`La avulsión de la inserción del tendón extensor en la base de la falange distal produce el llamado "dedo en martillo" (mallet finger), con incapacidad para extender por completo la articulación interfalángica distal.` },
+
+{ stem:`Un paciente de 45 años se cayó sobre la mano extendida, produciéndose una fractura de Smith en el extremo distal del radio. El hueso fracturado desplazó un hueso del carpo en dirección palmar, comprimiendo el nervio dentro del túnel del carpo. ¿Cuál de los siguientes huesos del carpo se habrá luxado?`,
+  options:["Escafoides","Trapecio","Grande","Ganchoso","Semilunar"], correct:4,
+  explain:`En la fractura de Smith, el fragmento distal del radio se desplaza en sentido volar y puede desplazar el semilunar hacia palmar, comprimiendo el nervio mediano dentro del túnel del carpo.` },
+
+{ stem:`Una joven de 15 años fue llevada a urgencias con un desgarro de los tendones del primer compartimento dorsal de la muñeca, debido a la mordedura de un pitbull. ¿Qué músculos incluyen los tendones lesionados en este compartimento?`,
+  options:["Extensor radial largo y corto del carpo","Abductor largo del pulgar y extensor corto del pulgar","Extensor de los dedos","Extensor propio del índice","Extensor cubital del carpo"], correct:1,
+  explain:`El primer compartimento dorsal de la muñeca contiene los tendones del abductor largo del pulgar y del extensor corto del pulgar.` },
+
+{ stem:`Al caer de las barras asimétricas, una gimnasta de 17 años se agarró brevemente a la barra inferior con una mano, pero cayó al suelo con mucho dolor. La RM muestra una lesión del fascículo medial del plexo braquial. ¿Qué nervios espinales se habrán afectado?`,
+  options:["C5, C6","C6, C7","C7, C8","C7, C8, T1","C8, T1"], correct:4,
+  explain:`El fascículo medial del plexo braquial se forma con fibras de C8 y T1, procedentes de la división anterior del tronco inferior.` },
+
+{ stem:`Una pitcher de softball de 21 años es examinada en urgencias tras ser golpeada en el brazo por una línea de bateo. El estudio radiológico y la RM muestran una lesión de partes blandas en la región del surco espiral, con traumatismo del nervio radial. ¿Cuál de los siguientes músculos permanece intacto tras esta lesión?`,
+  options:["Flexor cubital del carpo","Extensor propio del índice","Braquiorradial","Extensor radial del carpo","Supinador"], correct:0,
+  explain:`El flexor cubital del carpo está inervado por el nervio cubital, por lo que permanece intacto tras una lesión del nervio radial en el surco espiral.` },
+
+{ stem:`En la exploración de una atleta de 21 años con una lesión del nervio radial en el surco espiral, se encuentra clásicamente ¿cuál de los siguientes signos?`,
+  options:["Debilidad de la abducción y extensión del pulgar","Debilidad de la oposición del pulgar","Incapacidad para extender el codo","Parálisis de la pronación de la mano","Parálisis de la abducción y aducción del brazo"], correct:0,
+  explain:`Como las ramas para el tríceps ya se originaron proximalmente, la extensión del codo se conserva. El hallazgo clásico es la debilidad de los extensores/abductores del pulgar (abductor largo y extensor corto del pulgar), junto con la caída de la muñeca.` },
+
+{ stem:`Un empleado de una tienda, de 58 años, recibió una herida de bala superficial en las partes blandas de la cara medial del codo durante un intento de robo. Se reparó un nervio importante en el punto donde pasa bajo el epicóndilo medial, junto con una pequeña arteria que lo acompaña y que resultaba clave para su irrigación. ¿Cuál de las siguientes arterias se reparó?`,
+  options:["Braquial profunda","Colateral radial","Colateral cubital superior","Colateral cubital inferior","Recurrente cubital anterior"], correct:2,
+  explain:`La arteria colateral cubital superior acompaña al nervio cubital en su trayecto posterior al epicóndilo medial, siendo clave para su irrigación en ese punto.` },
+
+{ stem:`Un carnicero de 60 años se cortó accidentalmente la muñeca con el cuchillo de carnicero, seccionando parcialmente el nervio cubital. ¿Cuál de las siguientes acciones se pierde como consecuencia de esta lesión?`,
+  options:["Flexión de la articulación interfalángica proximal del 5.º dedo","Extensión del pulgar","Aducción del 5.º dedo","Abducción del pulgar","Oposición del pulgar"], correct:2,
+  explain:`Los interóseos palmares, inervados por el nervio cubital, son responsables de la aducción de los dedos (incluido el 5.º) hacia el eje del dedo medio.` },
+
+{ stem:`Un estudiante de medicina de 23 años se quedó dormido en una silla con el Atlas de Netter apoyado en su axila. Al despertar, no podía extender el antebrazo, la muñeca ni los dedos, aunque los movimientos de la articulación del hombro homolateral parecían normales. ¿Qué nervio se había comprimido?`,
+  options:["Fascículo lateral del plexo braquial","Fascículo medial del plexo braquial","Nervio radial","Nervio mediano","Nervios pectorales lateral y medial"], correct:2,
+  explain:`La compresión del nervio radial en la axila afecta la extensión del codo, la muñeca y los dedos, pero respeta los movimientos del hombro porque el nervio axilar no está comprometido.` },
+
+{ stem:`Una paciente de 32 años con insuficiencia renal requiere iniciar diálisis. La vena mayor de la cara lateral del brazo resultó demasiado pequeña y las demás eran muy delicadas. Finalmente se encontró una vena en la cara medial del brazo que atravesaba la fascia para unirse a las venas junto a la arteria braquial. ¿De cuál de las siguientes venas se trata?`,
+  options:["Basílica","Cubital lateral","Cefálica","Cubital medial","Antebraquial medial"], correct:0,
+  explain:`La vena basílica, en la cara medial del brazo, perfora la fascia braquial en su tercio medio para unirse a las venas comitantes de la arteria braquial y formar la vena axilar.` },
+
+{ stem:`Una mujer de 29 años sufrió una laceración profunda en la parte proximal del antebrazo. Tras cerrar la herida, se observan los siguientes defectos: los tres primeros dedos están en extensión y no pueden flexionarse; los dedos 4.º y 5.º presentan flexión parcial en las articulaciones metacarpofalángicas, con flexión notablemente mayor en las interfalángicas distales. La sensibilidad está ausente en la cara lateral de la palma, en las superficies palmares de los dedos 1 a 3 y en la mitad del 4.º dedo. ¿Qué nervio se ha lesionado?`,
+  options:["Nervio mediano","Nervios cubital y mediano","Nervio cubital","Nervios radial y cubital","Nervio radial"], correct:0,
+  explain:`La incapacidad para flexionar los tres primeros dedos, la flexión conservada del 4.º-5.º (por acción del cubital sobre la porción medial del flexor profundo) y la pérdida sensitiva palmar lateral son típicas de una lesión alta del nervio mediano.` },
+
+{ stem:`Un luchador de 35 años ingresa en urgencias con dolor muy intenso en el hombro derecho y la zona proximal del brazo. Se sujeta el brazo por el codo con la mano contraria y no puede mover la extremidad lesionada. El estudio radiológico muestra una luxación del húmero en la articulación glenohumeral. ¿Cuál de las siguientes es la más probable?`,
+  options:["La cabeza del húmero se ha desplazado anteriormente","La cabeza del húmero se ha desplazado posteriormente","La cabeza del húmero se ha desplazado inferiormente","La cabeza del húmero se ha desplazado superiormente","La cabeza del húmero se ha desplazado medialmente"], correct:0,
+  explain:`La luxación glenohumeral anterior es, con diferencia, la más frecuente, y suele presentarse con el paciente sosteniendo el brazo en aducción y rotación interna.` },
+
+{ stem:`Una paciente de 35 años tiene un nódulo duro de 1 cm situado ligeramente por encima y lateral a su areola derecha. Se inyecta un colorante en la piel que rodea el tumor y se practica una incisión para exponer los vasos linfáticos que drenan la zona. ¿Cuáles de los siguientes nódulos se encontrarán primero en la trayectoria de la linfa del tumor?`,
+  options:["Nódulos axilares anteriores (pectorales)","Nódulos interpectorales de Rotter","Nódulos paraesternales, siguiendo la arteria y vena torácica interna","Nódulos axilares centrales","Nódulos apicales o infraclaviculares"], correct:0,
+  explain:`El drenaje linfático de la mama, incluida la región superolateral, se dirige inicialmente en la mayoría de los casos a los nódulos axilares anteriores o pectorales (primer escalón, "nódulo centinela").` },
+
+{ stem:`Durante una pelea en una taberna, un albañil de 45 años recibió una herida punzante superficial con una botella rota, cerca de la zona media del triángulo cervical posterior izquierdo. En la exploración, el hombro izquierdo está más caído que el derecho y el ángulo superior de la escápula sobresale ligeramente. La fuerza al girar la cabeza hacia ambos lados es simétrica. ¿Qué nervio se ha lesionado?`,
+  options:["Nervio supraescapular en la fosa supraespinosa","Segmento terminal del nervio dorsal de la escápula","Tronco superior del plexo braquial","Nervio espinal accesorio en el triángulo cervical posterior","Nervio toracodorsal en la axila"], correct:3,
+  explain:`El nervio espinal accesorio, al cruzar el triángulo cervical posterior, es vulnerable a heridas penetrantes en esa zona. Su lesión paraliza el trapecio (hombro caído, ángulo superior de la escápula prominente), sin afectar al esternocleidomastoideo, por lo que la rotación de la cabeza se mantiene simétrica.` },
+
+{ stem:`Una mujer de 44 años es diagnosticada de parálisis del nervio radial. Al explorar la función muscular en las articulaciones metacarpofalángicas (MCF), interfalángica proximal (IFP) e interfalángica distal (IFD), ¿qué signos se encontrarán?`,
+  options:["Incapacidad para abducir los dedos en la articulación MCF","Incapacidad para aducir los dedos en la articulación MCF","Incapacidad para extender únicamente las articulaciones MCF","Incapacidad para extender las articulaciones MCF, IFP e IFD","Incapacidad para extender las articulaciones IFP e IFD"], correct:2,
+  explain:`Los interóseos y lumbricales, inervados por el mediano y el cubital, pueden extender las articulaciones IFP e IFD a través de la expansión extensora aun sin el nervio radial. Solo se pierde la extensión de las articulaciones metacarpofalángicas.` },
+
+{ stem:`Un pintor de 27 años ingresa tras caer de una escalera. En la exploración es incapaz de abducir el brazo más de 15° y no puede rotarlo lateralmente. El estudio radiológico muestra una fractura oblicua del húmero con pérdida sensitiva sobre la zona del hombro. ¿Cuál de las siguientes lesiones explica los hallazgos?`,
+  options:["Fractura del epicóndilo medial","Fractura de la fosa glenoidea","Fractura del cuello quirúrgico del húmero","Fractura del cuello anatómico del húmero","Fractura del tercio medio del húmero"], correct:2,
+  explain:`La fractura del cuello quirúrgico del húmero puede lesionar el nervio axilar, que inerva el deltoides (abducción del hombro más allá de los primeros grados) y el redondo menor (rotación lateral), y da sensibilidad a la piel sobre el deltoides.` },
+
+{ stem:`La mama derecha de una mujer de 47 años muestra el aspecto característico de piel de naranja. ¿A cuál de las siguientes situaciones se debe principalmente esta manifestación?`,
+  options:["Acortamiento de los ligamentos suspensorios por cáncer en la cola axilar","Bloqueo de los vasos linfáticos cutáneos","Contracción de los ligamentos de la piel de la areola y el pezón","Invasión del pectoral mayor por el cáncer","Inversión homolateral de la piel periareolar por un cáncer ductal"], correct:1,
+  explain:`El aspecto de "piel de naranja" se debe al bloqueo de los vasos linfáticos cutáneos por células tumorales, con el consiguiente linfedema que hunde la piel en los puntos de fijación de los ligamentos suspensorios.` },
+
+{ stem:`Una mujer de 29 años es examinada en urgencias tras caer de un balcón. El estudio radiológico muestra una fractura de clavícula con hemorragia interna asociada. ¿Cuál de los siguientes vasos se lesiona con mayor frecuencia en las fracturas de clavícula?`,
+  options:["Arteria subclavia","Vena cefálica","Arteria torácica lateral","Vena subclavia","Arteria torácica interna"], correct:3,
+  explain:`La vena subclavia discurre inmediatamente posterior e inferior a la clavícula, por delante del músculo escaleno anterior, lo que la hace especialmente vulnerable en las fracturas de clavícula.` },
+];
+
+let idx = 0;
+let stage = 0; // 0 caso, 1 imagen, 2 opciones
+let score = 0;
+let answered = false;
+
+const qNowEl = document.getElementById('qNow');
+const qTotalEl = document.getElementById('qTotal');
+const scoreNowEl = document.getElementById('scoreNow');
+const progressFill = document.getElementById('progressFill');
+const stemText = document.getElementById('stemText');
+const stageLabel = document.getElementById('stageLabel');
+const imageArea = document.getElementById('imageArea');
+const qImage = document.getElementById('qImage');
+const imgFallback = document.getElementById('imgFallback');
+const answers = document.getElementById('answers');
+const optionsWrap = document.getElementById('optionsWrap');
+const feedback = document.getElementById('feedback');
+const feedbackLabel = document.getElementById('feedbackLabel');
+const feedbackText = document.getElementById('feedbackText');
+const advanceBtn = document.getElementById('advanceBtn');
+const mainScroll = document.getElementById('mainScroll');
+const content = document.getElementById('content');
+const actionEyebrow = document.getElementById('actionEyebrow');
+const actionHint = document.getElementById('actionHint');
+const dots = [document.getElementById('dot0'),document.getElementById('dot1'),document.getElementById('dot2')];
+
+qTotalEl.textContent = questions.length;
+
+function vibrate(ms=10){
+  if('vibrate' in navigator) navigator.vibrate(ms);
+}
+
+function setStageUI(){
+  dots.forEach((dot,i)=>{
+    dot.classList.toggle('active',i===stage);
+    dot.classList.toggle('done',i<stage);
+  });
+  const labels = ['Lee el caso clínico','Observa el apoyo visual','Resuelve la pregunta'];
+  const hints = [
+    ['Paso 1 de 3','Comprende la viñeta antes de avanzar'],
+    ['Paso 2 de 3','Relaciona la imagen con la anatomía'],
+    ['Paso 3 de 3','Elige la mejor respuesta']
+  ];
+  stageLabel.textContent = labels[stage];
+  actionEyebrow.textContent = hints[stage][0];
+  actionHint.textContent = hints[stage][1];
+}
+
+function scrollToNode(node, offset=12){
+  requestAnimationFrame(()=>{
+    const top = node.offsetTop - offset;
+    mainScroll.scrollTo({top,behavior:'smooth'});
+  });
+}
+
+function renderQuestion(){
+  const q = questions[idx];
+  answered = false;
+  stage = 0;
+
+  qNowEl.textContent = idx + 1;
+  progressFill.style.width = `${((idx)/questions.length)*100}%`;
+  stemText.textContent = q.stem;
+
+  imageArea.hidden = true;
+  qImage.removeAttribute('src');
+  qImage.hidden = false;
+  imgFallback.hidden = true;
+
+  answers.hidden = true;
+  optionsWrap.innerHTML = '';
+  feedback.className = 'feedback';
+  feedbackLabel.textContent = '';
+  feedbackText.textContent = '';
+
+  advanceBtn.hidden = false;
+  advanceBtn.disabled = false;
+  advanceBtn.textContent = 'Ver imagen';
+
+  setStageUI();
+  mainScroll.scrollTo({top:0,behavior:'auto'});
+}
+
+function showImage(){
+  stage = 1;
+  setStageUI();
+  imageArea.hidden = false;
+
+  const src = `${idx + 1}.png`;
+  qImage.hidden = false;
+  imgFallback.hidden = true;
+  qImage.onload = ()=>{
+    qImage.hidden = false;
+    imgFallback.hidden = true;
+  };
+  qImage.onerror = ()=>{
+    qImage.hidden = true;
+    imgFallback.hidden = false;
+  };
+  qImage.src = src;
+
+  advanceBtn.textContent = 'Ver respuestas';
+  scrollToNode(imageArea,14);
+}
+
+function showOptions(){
+  const q = questions[idx];
+  stage = 2;
+  setStageUI();
+  answers.hidden = false;
+  optionsWrap.innerHTML = '';
+
+  q.options.forEach((text,i)=>{
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'opt';
+    button.setAttribute('aria-label',`Opción ${String.fromCharCode(65+i)}: ${text}`);
+    button.innerHTML = `
+      <span class="letter">${String.fromCharCode(65+i)}</span>
+      <span class="text"></span>
+      <span class="state" aria-hidden="true">•</span>`;
+    button.querySelector('.text').textContent = text;
+    button.addEventListener('click',()=>selectAnswer(i,button));
+    optionsWrap.appendChild(button);
+  });
+
+  advanceBtn.hidden = true;
+  scrollToNode(answers,14);
+}
+
+function selectAnswer(selectedIndex){
+  if(answered) return;
+  answered = true;
+  vibrate(12);
+
+  const q = questions[idx];
+  const all = [...optionsWrap.querySelectorAll('.opt')];
+  all.forEach((button,i)=>{
+    button.disabled = true;
+    if(i===q.correct){
+      button.classList.add('correct');
+      button.querySelector('.state').textContent = '✓';
+    } else if(i===selectedIndex){
+      button.classList.add('incorrect');
+      button.querySelector('.state').textContent = '×';
+    } else {
+      button.classList.add('dim');
+    }
+  });
+
+  feedback.classList.add('show');
+  if(selectedIndex===q.correct){
+    score++;
+    scoreNowEl.textContent = score;
+    feedback.classList.add('ok');
+    feedbackLabel.textContent = 'Respuesta correcta';
+  } else {
+    feedback.classList.add('bad');
+    feedbackLabel.textContent = `Respuesta incorrecta · correcta: ${String.fromCharCode(65+q.correct)}`;
+  }
+  feedbackText.textContent = q.explain;
+
+  actionEyebrow.textContent = 'Retroalimentación';
+  actionHint.textContent = selectedIndex===q.correct ? 'Buen razonamiento anatómico' : 'Revisa la explicación antes de continuar';
+  advanceBtn.hidden = false;
+  advanceBtn.textContent = idx===questions.length-1 ? 'Ver resultados' : 'Siguiente';
+  scrollToNode(feedback,26);
+}
+
+function advance(){
+  if(stage===0){showImage();return;}
+  if(stage===1){showOptions();return;}
+  if(stage===2 && answered){
+    if(idx<questions.length-1){
+      idx++;
+      renderQuestion();
+    }else{
+      showSummary();
+    }
+  }
+}
+
+advanceBtn.addEventListener('click',advance);
+
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Enter' || e.key===' '){
+    if(document.activeElement?.classList.contains('opt')) return;
+    if(!advanceBtn.hidden){e.preventDefault();advanceBtn.click();}
+  }
+});
+
+function showSummary(){
+  const pct = Math.round((score/questions.length)*100);
+  let tier = 'A repasar';
+  let message = 'Conviene reforzar la relación entre anatomía, función y localización de la lesión.';
+  if(pct>=90){tier='Dominio excelente';message='Tu razonamiento anatómico es consistente incluso en localizaciones clínicas finas.';}
+  else if(pct>=70){tier='Buen manejo clínico';message='Tienes una base sólida. Revisa los errores para afinar localización e inervación.';}
+  else if(pct>=50){tier='En progreso';message='Ya reconoces varios patrones. Enfócate en trayectos nerviosos y déficits motores/sensitivos.';}
+
+  progressFill.style.width = '100%';
+  qNowEl.textContent = questions.length;
+  dots.forEach(d=>{d.className='done'});
+
+  content.innerHTML = `
+    <section class="summary">
+      <div class="overline">Cuestionario completado</div>
+      <h1>${tier}</h1>
+      <p class="lead">${message}</p>
+      <div class="big-score"><b>${pct}%</b><span>${score} / ${questions.length}</span></div>
+      <div class="stats">
+        <div class="stat"><b style="color:var(--good)">${score}</b><span>Correctas</span></div>
+        <div class="stat"><b style="color:var(--bad)">${questions.length-score}</b><span>Incorrectas</span></div>
+        <div class="stat"><b style="color:var(--accent-2)">${questions.length}</b><span>Total</span></div>
+      </div>
+      <button class="restart" id="restartBtn" type="button">Repetir cuestionario</button>
+    </section>`;
+
+  document.getElementById('restartBtn').addEventListener('click',()=>location.reload());
+  document.getElementById('actionbar').style.display = 'none';
+  mainScroll.scrollTo({top:0,behavior:'auto'});
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
